@@ -5,22 +5,26 @@
 
 #define MAX 50
 
-int matrix[MAX][MAX];
-int n;
-int magic_constant;
+/* Global variables */
+int matrix[MAX][MAX];       // stores square read from file
+int n;                      // size of square
+int magic_constant;         // taget sum of row/col/diag
 
-int row_status[MAX];
+int row_status[MAX];        // 1 valid, 0 invalid
 int col_status[MAX];
-int diag_status[2];
-int unique_status;
+int diag_status[2];         // [0] -> main diag, [1] -> secondary diag
+int unique_status;          // 1 -> in range, 0 -> not in range
 
 int score = 0;
 int max_score;
 
-pthread_mutex_t lock;
+pthread_mutex_t lock;       // protect shared score
 
-/* Update score safely */
+
 void update_score(int valid)
+/*  Update score safely
+    if valid, increment score.
+    if invalid, decrement score. */
 {
     pthread_mutex_lock(&lock);
 
@@ -46,7 +50,7 @@ void *check_rows(void *arg)
         for(int j = 0; j < n; j++)
             sum += matrix[i][j];
 
-        sleep(1);
+        sleep(1);       // simluate heavy processing to pause thread
 
         if(sum == magic_constant)
         {
@@ -135,7 +139,7 @@ void *check_diagonals(void *arg)
 /* Uniqueness validation thread */
 void *check_unique(void *arg)
 {
-    int seen[MAX*MAX+1] = {0};
+    int seen[MAX*MAX+1] = {0};      // record values that have already appeared
     int valid = 1;
 
     for(int i = 0; i < n; i++)
@@ -144,7 +148,7 @@ void *check_unique(void *arg)
         {
             int val = matrix[i][j];
 
-            if(val < 1 || val > n*n || seen[val])
+            if(val < 1 || val > n*n || seen[val])   // check for failure
             {
                 valid = 0;
                 break;
@@ -263,11 +267,13 @@ int main(int argc, char *argv[])
 
     pthread_t t1, t2, t3, t4;
 
+    // create worker threads
     pthread_create(&t1, NULL, check_rows, NULL);
     pthread_create(&t2, NULL, check_columns, NULL);
     pthread_create(&t3, NULL, check_diagonals, NULL);
     pthread_create(&t4, NULL, check_unique, NULL);
 
+    // pause main thread until each worker has finished
     pthread_join(t1, NULL);
     pthread_join(t2, NULL);
     pthread_join(t3, NULL);
