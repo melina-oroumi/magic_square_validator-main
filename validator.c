@@ -60,7 +60,7 @@ void *check_rows(void *arg)
         }
     }
 
-    printf("Thread ID-%lu: Row checks completed.\n", (unsigned long)pthread_self());    printf("Thread ID-%lu: Row checks completed.\n", pthread_self());
+    printf("Thread ID-%lu: Row checks completed.\n", (unsigned long)pthread_self());
     pthread_exit(NULL);
 }
 
@@ -166,7 +166,7 @@ void *check_unique(void *arg)
     else
         update_score(0);
 
-    printf("Thread ID-%lu: Row checks completed.\n", (unsigned long)pthread_self());
+    printf("Thread ID-%lu: Uniqueness check completed.\n", (unsigned long)pthread_self());
     pthread_exit(NULL);
 }
 
@@ -242,6 +242,13 @@ int main(int argc, char *argv[])
     }
 
     fscanf(fp, "%d", &n);
+
+    if (n <= 0 || n > MAX)
+    {
+        printf("Invalid square size.\n");
+        fclose(fp);
+        return 1;
+    }
 
     for(int i = 0; i < n; i++)
         for(int j = 0; j < n; j++)
