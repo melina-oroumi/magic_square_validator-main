@@ -148,7 +148,7 @@ void *check_unique(void *arg)
         {
             int val = matrix[i][j];
 
-            if(val < 1 || val > n*n || seen[val])
+            if(val < 1 || val > n*n)
             {
                 valid = 0;
                 unique_error_type = 2;
